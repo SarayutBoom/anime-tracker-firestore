@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "771529001825",
+    "project_id": "anime-trackerapp",
+    "storage_bucket": "anime-trackerapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:771529001825:android:89d0afa333b724e7659320",
+        "android_client_info": {
+          "package_name": "com.example.anime_tracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDPtNCgaYsgqGrurDwkf9Y_LJs0ey2C0cM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
