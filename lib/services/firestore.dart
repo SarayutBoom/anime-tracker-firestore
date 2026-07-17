@@ -1,11 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirestoreService {
-  // อ้างอิงถึง collection ชื่อ 'animes' บน Firestore
   final CollectionReference animes =
       FirebaseFirestore.instance.collection('animes');
 
-  // ============ CREATE: เพิ่มอนิเมะใหม่ ============
+  // CREATE
   Future<void> addAnime({
     required String name,
     required int episodes,
@@ -21,12 +20,12 @@ class FirestoreService {
     });
   }
 
-  // ============ READ: ดึงข้อมูลแบบ real-time (Stream) ============
+  // READ
   Stream<QuerySnapshot> getAnimesStream() {
     return animes.orderBy('timestamp', descending: true).snapshots();
   }
 
-  // ============ UPDATE: แก้ไขข้อมูล ============
+  // UPDATE
   Future<void> updateAnime({
     required String docID,
     required String name,
@@ -43,7 +42,7 @@ class FirestoreService {
     });
   }
 
-  // ============ DELETE: ลบข้อมูล ============
+  // DELETE
   Future<void> deleteAnime(String docID) {
     return animes.doc(docID).delete();
   }

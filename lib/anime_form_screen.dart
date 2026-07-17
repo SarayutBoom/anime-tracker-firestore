@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'services/firestore.dart';
 
 class AnimeFormScreen extends StatefulWidget {
-  // ถ้ามี docID = แก้ไข, ถ้าไม่มี = เพิ่มใหม่
   final String? docID;
   final String? initialName;
   final int? initialEpisodes;
@@ -32,15 +31,20 @@ class _AnimeFormScreenState extends State<AnimeFormScreen> {
 
   final FirestoreService _firestoreService = FirestoreService();
 
-  static const Color primaryColor = Color(0xFF6C5CE7);
-  static const Color accentColor = Color(0xFFFF6B9D);
+  static const Color bgColor = Color(0xFFFAFAFA);
+  static const Color surfaceColor = Color(0xFFFFFFFF);
+  static const Color borderColor = Color(0xFFE5E7EB);
+  static const Color accentColor = Color(0xFF2563EB);
+  static const Color textPrimary = Color(0xFF0F172A);
+  static const Color textSecondary = Color(0xFF475569);
+  static const Color textTertiary = Color(0xFF64748B);
+  static const Color errorColor = Color(0xFFEF4444);
 
   bool get isEditMode => widget.docID != null;
 
   @override
   void initState() {
     super.initState();
-    // ถ้าเป็นโหมดแก้ไข ให้ใส่ค่าเดิมเข้าไป
     if (isEditMode) {
       _nameController.text = widget.initialName ?? '';
       _episodesController.text = widget.initialEpisodes?.toString() ?? '';
@@ -58,7 +62,6 @@ class _AnimeFormScreenState extends State<AnimeFormScreen> {
     super.dispose();
   }
 
-  // -------- บันทึกข้อมูล --------
   Future<void> _saveAnime() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -89,9 +92,14 @@ class _AnimeFormScreenState extends State<AnimeFormScreen> {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-                Text(isEditMode ? 'แก้ไขเรียบร้อยแล้ว' : 'บันทึกเรียบร้อยแล้ว'),
-            backgroundColor: Colors.green,
+            content: Text(
+              isEditMode ? 'Updated successfully' : 'Saved to Firestore',
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            backgroundColor: textPrimary,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
@@ -102,7 +110,7 @@ class _AnimeFormScreenState extends State<AnimeFormScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('เกิดข้อผิดพลาด: $e')),
+          SnackBar(content: Text('ERROR: $e')),
         );
       }
     }
@@ -111,180 +119,205 @@ class _AnimeFormScreenState extends State<AnimeFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F3FF),
-      appBar: AppBar(
-        elevation: 0,
-        flexibleSpace: Container(
+      backgroundColor: bgColor,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(100),
+        child: Container(
           decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [primaryColor, accentColor],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            color: bgColor,
+            border: Border(bottom: BorderSide(color: borderColor, width: 1)),
           ),
-        ),
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: Text(
-          isEditMode ? 'แก้ไขอนิเมะ' : 'เพิ่มอนิเมะใหม่',
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8, 14, 24, 18),
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back_rounded,
+                        color: textPrimary, size: 26),
+                  ),
+                  const SizedBox(width: 4),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: accentColor,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            isEditMode ? 'EDIT' : 'NEW',
+                            style: const TextStyle(
+                              color: textSecondary,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        isEditMode ? 'Edit Title' : 'Add New Title',
+                        style: const TextStyle(
+                          color: textPrimary,
+                          fontSize: 25,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
+                          height: 1.1,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(24, 28, 24, 100),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header icon
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [primaryColor, accentColor],
-                    ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: primaryColor.withValues(alpha: 0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    isEditMode
-                        ? Icons.edit_note_rounded
-                        : Icons.add_circle_outline_rounded,
-                    color: Colors.white,
-                    size: 50,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 30),
-
-              // ชื่ออนิเมะ
-              _buildLabel('ชื่ออนิเมะ', Icons.movie_rounded),
-              const SizedBox(height: 8),
+              _sectionLabel('01', 'TITLE INFORMATION'),
+              const SizedBox(height: 14),
               _buildTextField(
                 controller: _nameController,
-                hint: 'เช่น Attack on Titan',
+                label: 'Anime Name',
+                hint: 'e.g. Attack on Titan',
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) {
-                    return 'กรุณากรอกชื่ออนิเมะ';
+                    return 'Name is required';
                   }
                   return null;
                 },
               ),
-              const SizedBox(height: 20),
-
-              // จำนวนตอน
-              _buildLabel('จำนวนตอน', Icons.playlist_play_rounded),
-              const SizedBox(height: 8),
-              _buildTextField(
-                controller: _episodesController,
-                hint: 'เช่น 24',
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                validator: (v) {
-                  if (v == null || v.isEmpty) return 'กรุณากรอกจำนวนตอน';
-                  final n = int.tryParse(v);
-                  if (n == null || n <= 0) return 'ต้องเป็นจำนวนเต็มบวก';
-                  return null;
-                },
+              const SizedBox(height: 30),
+              _sectionLabel('02', 'DETAILS'),
+              const SizedBox(height: 14),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: _buildTextField(
+                      controller: _episodesController,
+                      label: 'Episodes',
+                      hint: '24',
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly
+                      ],
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return 'Required';
+                        final n = int.tryParse(v);
+                        if (n == null || n <= 0) return 'Invalid';
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: _buildTextField(
+                      controller: _seasonController,
+                      label: 'Season',
+                      hint: '1',
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly
+                      ],
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return 'Required';
+                        final n = int.tryParse(v);
+                        if (n == null || n <= 0) return 'Invalid';
+                        return null;
+                      },
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
-
-              // ซีซั่นที่
-              _buildLabel('ซีซั่นที่', Icons.layers_rounded),
-              const SizedBox(height: 8),
-              _buildTextField(
-                controller: _seasonController,
-                hint: 'เช่น 1',
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                validator: (v) {
-                  if (v == null || v.isEmpty) return 'กรุณากรอกซีซั่น';
-                  final n = int.tryParse(v);
-                  if (n == null || n <= 0) return 'ต้องเป็นจำนวนเต็มบวก';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-
-              // คะแนน
-              _buildLabel('คะแนน (0.00 - 5.00)', Icons.star_rounded),
-              const SizedBox(height: 8),
+              const SizedBox(height: 30),
+              _sectionLabel('03', 'RATING'),
+              const SizedBox(height: 14),
               _buildTextField(
                 controller: _scoreController,
-                hint: 'เช่น 4.75',
+                label: 'Score',
+                hint: '4.75',
+                suffix: '/ 5.00',
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
-                  // อนุญาตแค่ตัวเลขและจุด ทศนิยมไม่เกิน 2 ตำแหน่ง
-                  FilteringTextInputFormatter.allow(
-                      RegExp(r'^\d*\.?\d{0,2}')),
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
                 ],
                 validator: (v) {
-                  if (v == null || v.isEmpty) return 'กรุณากรอกคะแนน';
+                  if (v == null || v.isEmpty) return 'Required';
                   final n = double.tryParse(v);
-                  if (n == null) return 'กรุณากรอกตัวเลขที่ถูกต้อง';
-                  if (n < 0 || n > 5) return 'ต้องอยู่ในช่วง 0.00 - 5.00';
+                  if (n == null) return 'Invalid number';
+                  if (n < 0 || n > 5) return 'Must be 0.00 - 5.00';
                   return null;
                 },
               ),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.only(left: 4),
+              const SizedBox(height: 10),
+              const Padding(
+                padding: EdgeInsets.only(left: 4),
                 child: Text(
-                  '* ทศนิยมได้สูงสุด 2 ตำแหน่ง',
+                  'Range: 0.00 – 5.00 · Max 2 decimals',
                   style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                    fontStyle: FontStyle.italic,
+                    fontSize: 13,
+                    color: textTertiary,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
-              const SizedBox(height: 30),
-
-              // ปุ่มบันทึก
-              SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton(
-                  onPressed: _saveAnime,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+              const SizedBox(height: 40),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: accentColor.withValues(alpha: 0.25),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
                     ),
-                    elevation: 4,
-                    shadowColor: primaryColor.withValues(alpha: 0.5),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        isEditMode
-                            ? Icons.save_rounded
-                            : Icons.cloud_upload_rounded,
-                        color: Colors.white,
+                  ],
+                ),
+                child: Material(
+                  color: accentColor,
+                  borderRadius: BorderRadius.circular(14),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: _saveAnime,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 19),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            isEditMode ? 'SAVE CHANGES' : 'CREATE',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          const Icon(Icons.arrow_forward_rounded,
+                              color: Colors.white, size: 20),
+                        ],
                       ),
-                      const SizedBox(width: 10),
-                      Text(
-                        isEditMode ? 'บันทึกการแก้ไข' : 'บันทึกลง Firestore',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -295,66 +328,114 @@ class _AnimeFormScreenState extends State<AnimeFormScreen> {
     );
   }
 
-  // -------- Label สำหรับแต่ละ field --------
-  Widget _buildLabel(String text, IconData icon) {
+  Widget _sectionLabel(String number, String label) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: primaryColor),
+        Text(
+          number,
+          style: const TextStyle(
+            color: accentColor,
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.2,
+            fontFeatures: [FontFeature.tabularFigures()],
+          ),
+        ),
         const SizedBox(width: 8),
         Text(
-          text,
+          label,
           style: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: textSecondary,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.5,
           ),
+        ),
+        const SizedBox(width: 10),
+        const Expanded(
+          child: Divider(color: borderColor, thickness: 1),
         ),
       ],
     );
   }
 
-  // -------- TextField แบบ styled --------
   Widget _buildTextField({
     required TextEditingController controller,
+    required String label,
     required String hint,
+    String? suffix,
     TextInputType? keyboardType,
     List<TextInputFormatter>? inputFormatters,
     String? Function(String?)? validator,
   }) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      inputFormatters: inputFormatters,
-      validator: validator,
-      style: const TextStyle(fontSize: 15),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: TextStyle(color: Colors.grey[400]),
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: textSecondary,
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+          ),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+        const SizedBox(height: 10),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+          validator: validator,
+          style: const TextStyle(
+            fontSize: 17,
+            color: textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+          cursorColor: accentColor,
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: const TextStyle(
+              color: textTertiary,
+              fontWeight: FontWeight.w400,
+              fontSize: 16,
+            ),
+            suffixText: suffix,
+            suffixStyle: const TextStyle(
+              color: textSecondary,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+            filled: true,
+            fillColor: surfaceColor,
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: borderColor),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: borderColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: accentColor, width: 1.8),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: errorColor),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: errorColor, width: 1.8),
+            ),
+            errorStyle: const TextStyle(
+              color: errorColor,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: primaryColor, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.redAccent),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.redAccent, width: 2),
-        ),
-      ),
+      ],
     );
   }
 }
