@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'first_screen.dart';
+import 'screens/home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Status bar เป็นสีเข้มบน background ขาว
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -39,7 +38,7 @@ class MyApp extends StatelessWidget {
           surface: Color(0xFFFAFAFA),
         ),
       ),
-      home: const FirstScreen(),
+      home: const HomeScreen(),
     );
   }
 }
